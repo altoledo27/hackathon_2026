@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import * as tf from "@tensorflow/tfjs";
 import * as handpose from "@tensorflow-models/handpose";
+import LandingPage from "./LandingPage";
 
 export default function App() {
   const videoRef = useRef(null);
   const [text, setText] = useState("Esperando mano...");
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    if (!started) return;
+
     let model;
 
     async function run() {
@@ -25,7 +29,6 @@ export default function App() {
 
         if (predictions.length > 0) {
           const landmarks = predictions[0].landmarks;
-
           detectGesture(landmarks);
         } else {
           setText("Esperando mano...");
@@ -34,7 +37,7 @@ export default function App() {
     }
 
     run();
-  }, []);
+  }, [started]); // 👈 este era el problema, estaba []
 
   function detectGesture(p) {
     const thumbTip = p[4];
@@ -42,10 +45,8 @@ export default function App() {
     const middleTip = p[12];
     const ringTip = p[16];
     const pinkyTip = p[20];
-
     const wrist = p[0];
 
-    // Mano abierta
     if (
       indexTip[1] < wrist[1] &&
       middleTip[1] < wrist[1] &&
@@ -56,26 +57,20 @@ export default function App() {
       return;
     }
 
-    // Pulgar arriba
-    if (
-      thumbTip[1] < wrist[1] &&
-      indexTip[1] > thumbTip[1]
-    ) {
+    if (thumbTip[1] < wrist[1] && indexTip[1] > thumbTip[1]) {
       setText("Sí 👍");
       return;
     }
 
-    // Puño cerrado
-    if (
-      indexTip[1] > wrist[1] &&
-      middleTip[1] > wrist[1]
-    ) {
+    if (indexTip[1] > wrist[1] && middleTip[1] > wrist[1]) {
       setText("No ✊");
       return;
     }
 
     setText("Mano detectada");
   }
+
+  if (!started) return <LandingPage onStart={() => setStarted(true)} />;
 
   return (
     <div style={{
@@ -88,7 +83,7 @@ export default function App() {
       alignItems: "center",
       gap: "20px"
     }}>
-      <h1 style={{fontSize:"48px"}}>Aura AI</h1>
+      <h1 style={{ fontSize: "48px" }}>Aura AI</h1>
 
       <video
         ref={videoRef}
@@ -99,7 +94,7 @@ export default function App() {
         style={{ borderRadius: "20px" }}
       />
 
-      <h2 style={{fontSize:"40px", color:"#00ffff"}}>{text}</h2>
+      <h2 style={{ fontSize: "40px", color: "#00ffff" }}>{text}</h2>
     </div>
   );
 }

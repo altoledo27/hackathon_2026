@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@mediapipe/hands": "^0.4.1675469240",
+    "@teachablemachine/image": "^0.8.5",
     "@tensorflow-models/handpose": "^0.1.0",
     "@tensorflow/tfjs": "^4.22.0",
     "react": "^19.2.4",

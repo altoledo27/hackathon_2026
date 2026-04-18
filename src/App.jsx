@@ -11,6 +11,8 @@ export default function App() {
   const [lastWord, setLastWord] = useState("");
 
   useEffect(() => {
+    if (!started) return;
+
     let model;
     let interval;
 
@@ -56,6 +58,8 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, [lastWord]);
+
+  if (!started) return <LandingPage onStart={() => setStarted(true)} />;
 
   return (
     <div
